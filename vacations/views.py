@@ -1,3 +1,6 @@
-from django.shortcuts import render
+from rest_framework.views import APIView
 
-# Create your views here.
+
+class VacationAPI(APIView):
+    def post(self, request):
+        return True
