@@ -8,3 +8,7 @@ class Vacation(models.Model):
     created_at = models.DateTimeField(auto_created=True)
     deleted_at = models.DateTimeField(null=True)
 
+
+class User(models.Model):
+    id = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=100)
