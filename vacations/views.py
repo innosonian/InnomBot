@@ -7,24 +7,29 @@ from .models import Vacation
 
 class VacationAPI(APIView):
     def post(self, request):
-        all = Vacation.objects.values('user_name', 'date')
-        count = len(all)
+        vacation = Vacation.objects.filter(user=request.data.get('user_id'))
+        serializer = VacationSerializer(vacation, many=True)
+        result = list()
+        for data in serializer.data:
+            vacation_format = data.get('date')
+            result.append(vacation_format)
+        vacations = '\n'.join(result)
         form = {
             "blocks": [
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"OOO님의 휴가 사용 현황:{count}"
+                        "text": f"OOO님의 휴가 사용 현황:{len(vacation)}"
                     }
                 },
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "15일 중 10일 사용하셨습니다. 남은 휴가 일수는 5일 입니다."
+                        "text": f"{vacations}"
                     }
-                }
+                },
             ]
         }
         return Response(form, status.HTTP_200_OK)
