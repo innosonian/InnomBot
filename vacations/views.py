@@ -15,21 +15,58 @@ class VacationAPI(APIView):
             result.append(vacation_format)
         vacations = '\n'.join(result)
         form = {
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"OOO님의 휴가 사용 현황:{len(vacation)}"
+            "channel": "D04BJFUAQFR",
+            "attachments": [{
+                "color": "#2eb886",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*{user.name}* 님의 휴가 사용 내역: *{len(vacation)}*"
+                        }
+                    },
+                    {
+                        "type": "divider"
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"{vacations}"
+                        }
+                    },
+                    {
+                        "type": "section",
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "사용 완료",
+                            },
+                            "style": "primary"
+                        },
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "2022.11.21 (금) - 1일"
+                        }
+                    },
+                    {
+                        "type": "section",
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "사용 완료",
+                            },
+                            "style": "primary"
+                        },
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "2022.11.21 (금) ~ 11.22 (토) - 2일"
+                        }
                     }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"{vacations}"
-                    }
-                },
-            ]
+                ]
+            }]
         }
         return Response(form, status.HTTP_200_OK)
