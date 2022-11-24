@@ -16,7 +16,7 @@ class VacationAPI(APIView):
             result.append(vacation_format)
         vacations = '\n'.join(result)
         form = {
-            "channel": "D04BJFUAQFR",
+            "response_type": "in_channel",
             "attachments": [{
                 "color": "#2eb886",
                 "blocks": [
@@ -70,4 +70,4 @@ class VacationAPI(APIView):
                 ]
             }]
         }
-        return Response(form, status.HTTP_200_OK)
+        return Response(data=form, status=status.HTTP_200_OK)
