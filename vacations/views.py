@@ -2,12 +2,13 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
-from .models import Vacation
+from .models import Vacation, User
 
 
 class VacationAPI(APIView):
     def post(self, request):
-        vacation = Vacation.objects.filter(user=request.data.get('user_id'))
+        user = User.objects.get(id=request.data.get('user_id'))
+        vacation = Vacation.objects.filter(user=user)
         serializer = VacationSerializer(vacation, many=True)
         result = list()
         for data in serializer.data:
@@ -20,7 +21,8 @@ class VacationAPI(APIView):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"OOO님의 휴가 사용 현황:{len(vacation)}"
+                        "text": f""
+                                f"{user.name}님의 휴가 사용 현황: {len(vacation)}"
                     }
                 },
                 {
