@@ -2,12 +2,13 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
-from .models import Vacation
+from .models import Vacation, User
 
 
 class VacationAPI(APIView):
     def post(self, request):
-        vacation = Vacation.objects.filter(user=request.data.get('user_id'))
+        user = User.objects.get(id=request.data.get('user_id'))
+        vacation = Vacation.objects.filter(user=user)
         serializer = VacationSerializer(vacation, many=True)
         result = list()
         for data in serializer.data:
@@ -16,6 +17,7 @@ class VacationAPI(APIView):
         vacations = '\n'.join(result)
         form = {
             "channel": "D04BJFUAQFR",
+            "response_type": "in_channel",
             "attachments": [{
                 "color": "#2eb886",
                 "blocks": [
@@ -69,4 +71,4 @@ class VacationAPI(APIView):
                 ]
             }]
         }
-        return Response(form, status.HTTP_200_OK)
+        return Response(data=form, status=status.HTTP_200_OK)
