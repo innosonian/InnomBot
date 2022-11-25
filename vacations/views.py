@@ -3,7 +3,18 @@ from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
 from .models import Vacation, User
+from datetime import datetime, date
+import dateutil.parser
 
+def timezone_parser(timezone_data):
+    days = ['월(Mon)','화(Tue)','수(Wed)','목(Thu)','금(Fri)','토(Sat)','일(Sun)']
+    dt_parse = dateutil.parser.parse(timezone_data)
+    dt_form = dt_parse.year, dt_parse.month, dt_parse.day
+    day = date(dt_parse.year, dt_parse.month, dt_parse.day).weekday()
+    final_format = f"{dt_form[0]}.{dt_form[1]}.{dt_form[2]} {days[day]}"
+    print("final_format::::", final_format )
+
+    return final_format
 
 class VacationAPI(APIView):
     def post(self, request):
@@ -12,8 +23,10 @@ class VacationAPI(APIView):
         serializer = VacationSerializer(vacation, many=True)
         result = list()
         for data in serializer.data:
-            vacation_format = data.get('start_date')
+            vacation_format = timezone_parser(data.get('start_date'))
+            print("vacation_format::::", vacation_format)
             result.append(vacation_format)
+
         vacations = '\n'.join(result)
         form = {
             "response_type": "in_channel",
