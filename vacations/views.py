@@ -12,7 +12,7 @@ class VacationAPI(APIView):
         serializer = VacationSerializer(vacation, many=True)
         result = list()
         for data in serializer.data:
-            vacation_format = data.get('date')
+            vacation_format = data.get('start_date')
             result.append(vacation_format)
         vacations = '\n'.join(result)
         form = {

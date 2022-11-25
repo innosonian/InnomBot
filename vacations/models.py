@@ -11,7 +11,8 @@ class User(models.Model):
 
 class Vacation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateTimeField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     message = models.TextField(null=True)
     created_at = models.DateTimeField(auto_created=True)
     deleted_at = models.DateTimeField(null=True)
