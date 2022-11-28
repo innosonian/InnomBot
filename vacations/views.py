@@ -47,10 +47,10 @@ class VacationAPI(APIView):
         result.append(user_data_form)
         result.append(divider)
 
-        button_text = {"type": "plain_text", "text": ""}
-        button = {"type": "button", "text": button_text}
-        vacation_form = {"type": "mrkdwn", "text": ""}
-        vacation_list_form = {"type": "section", "accessory": button, "text": vacation_form}
+        # button_text = {"type": "plain_text", "text": ""}
+        # button = {"type": "button", "text": button_text}
+        # vacation_form = {"type": "mrkdwn", "text": ""}
+        # vacation_list_form = {"type": "section", "accessory": button, "text": vacation_form}
 
         for data in serializer.data:
             start_date = date_formatter(data.get('start_date'))
@@ -62,13 +62,22 @@ class VacationAPI(APIView):
             total_vacations.append(cal_vacations)
             section_text['text'] = f"*{user.name}* 님의 휴가 사용 내역: 총 *{len(vacation)}* 건, 사용 일수: 총 *{sum(total_vacations)}* 일"
 
+            globals()['button_text{}'.format(data.get('id'))] = {"type": "plain_text", "text": ""}
+            globals()['button{}'.format(data.get('id'))] = {"type": "button", "text": globals()['button_text{}'.format(data.get('id'))]}
+            globals()['vacation_form{}'.format(data.get('id'))] = {"type": "mrkdwn", "text": ""}
+            globals()['vacation_list_form{}'.format(data.get('id'))] = {"type": "section",
+                                                                        "accessory": globals()['button{}'.format(data.get('id'))],
+                                                                        "text": globals()['vacation_form{}'.format(data.get('id'))]}
+
+            result.append(globals()['vacation_list_form{}'.format(data.get('id'))])
+
             try:
                 if datetime.today() >= datetime(start_date.year, start_date.month, start_date.day, hour=11):
-                    button_text["text"] = "사용완료"
+                    globals()['vacation_list_form{}'.format(data.get('id'))]["accessory"]["text"]["text"] = "사용완료"
                 else:
-                    button_text["text"] = "사용대기"
+                    globals()['vacation_list_form{}'.format(data.get('id'))]["accessory"]["text"]["text"] = "사용대기"
                     button_style = {"style" : "primary"}
-                    button.update(button_style)
+                    globals()['vacation_list_form{}'.format(data.get('id'))]["accessory"].update(button_style)
             except:
                 print("error, 날짜 데이터 연산에 실패했습니다. 데이터를 확인해 주세요.")
 
@@ -76,13 +85,14 @@ class VacationAPI(APIView):
                 if start_date == end_date:
                     print("start_date == end_date 몇번 타나")
                     print("data.get('id'):::::", data.get('id'))
-                    globals()['vacation_list_form{}'.format(data.get('id'))] = {"type": "section", "accessory": button,
-                                                                                "text": vacation_form}
+                    # 기존 코드2
+                    # globals()['vacation_list_form{}'.format(data.get('id'))] = {"type": "section", "accessory": button,
+                    #                                                                         "text": vacation_form}
+                    #  result.append(globals()['vacation_list_form{}'.format(data.get('id'))])
                     globals()['vacation_list_form{}'.format(data.get('id'))]["text"]["text"] = f"{start_date}{start_day} - {cal_vacations}day"
                     print(f"vacation_list_form_{data.get('id')}:::::", globals()['vacation_list_form{}'.format(data.get('id'))])
-                    result.append(globals()['vacation_list_form{}'.format(data.get('id'))])
 
-                    # 기존 코드
+                    # 기존 코드1
                     # vacation_form["text"] = f"{start_date}{start_day} - {cal_vacations}day"
                     # print("== vacation_list_form :::/n", vacation_list_form)
                     # result.append(vacation_list_form)
@@ -90,13 +100,15 @@ class VacationAPI(APIView):
                 else:
                     print("start_date <> end_date 몇번 타나")
                     print("data.get('id'):::::", data.get('id'))
-                    globals()['vacation_list_form{}'.format(data.get('id'))] = {"type": "section", "accessory": button,
-                                                                                "text": vacation_form}
+                    # 기존 코드2
+                    # globals()['vacation_list_form{}'.format(data.get('id'))] = {"type": "section", "accessory": button,
+                    #                                                             "text": vacation_form}
+                    # result.append(globals()['vacation_list_form{}'.format(data.get('id'))])
                     globals()['vacation_list_form{}'.format(data.get('id'))]["text"]["text"] = f"{start_date}{start_day} ~ {end_date}{end_day} - {cal_vacations}days "
                     print(f"vacation_list_form_{data.get('id')}:::::", globals()['vacation_list_form{}'.format(data.get('id'))])
-                    result.append(globals()['vacation_list_form{}'.format(data.get('id'))])
 
-                    # 기존 코드
+
+                    # 기존 코드1
                     # vacation_form["text"] = f"{start_date}{start_day} ~ {end_date}{end_day} - {cal_vacations}days "
                     # print("<> vacation_list_form :::/n", vacation_list_form)
                     # result.append(vacation_list_form)
