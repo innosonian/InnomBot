@@ -5,82 +5,87 @@ from vacations.serializers import VacationSerializer
 from .models import Vacation, User
 from datetime import datetime, date
 import dateutil.parser
+import json
 
-def timezone_parser(timezone_data):
-    days = ['월(Mon)','화(Tue)','수(Wed)','목(Thu)','금(Fri)','토(Sat)','일(Sun)']
+
+def date_formatter(timezone_data):
     dt_parse = dateutil.parser.parse(timezone_data)
-    dt_form = dt_parse.year, dt_parse.month, dt_parse.day
-    day = date(dt_parse.year, dt_parse.month, dt_parse.day).weekday()
-    final_format = f"{dt_form[0]}.{dt_form[1]}.{dt_form[2]} {days[day]}"
-    print("final_format::::", final_format )
+    date_format = date(dt_parse.year, dt_parse.month, dt_parse.day)
+    return date_format
 
-    return final_format
+
+def day_of_date(date_format):
+    days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
+    day_num = date_format.weekday()
+    day= days[day_num]
+    return day
+
 
 class VacationAPI(APIView):
     def post(self, request):
         user = User.objects.get(id=request.data.get('user_id'))
         vacation = Vacation.objects.filter(user=user)
         serializer = VacationSerializer(vacation, many=True)
-        result = list()
-        for data in serializer.data:
-            vacation_format = timezone_parser(data.get('start_date'))
-            print("vacation_format::::", vacation_format)
-            result.append(vacation_format)
+        form = self.generate_from_data(serializer.data, user)
+        print("form:::", form)
+        return Response(data=form, status=status.HTTP_200_OK)
 
-        vacations = '\n'.join(result)
+    def generate_from_data(self, serialized_vacation, user):
+        result = list()
+        total_vacations = list()
+
+        section_text = {"type": "mrkdwn", "text": ""}
+        user_data_form = {"type": "section", "text": section_text}
+        divider = {"type": "divider"}
+        result.append(user_data_form)
+        result.append(divider)
+
+        for data in serialized_vacation:
+            button_text = {"type": "plain_text", "text": ""}
+            button = {"type": "button", "text": button_text}
+            vacation_form = {"type": "mrkdwn", "text": ""}
+            vacation_list_form = {"type": "section", "accessory": button, "text": vacation_form}
+
+            start_date = date_formatter(data.get('start_date'))
+            start_day = day_of_date(start_date)
+            end_date = date_formatter(data.get('end_date'))
+            end_day = day_of_date(end_date)
+
+            # 각 휴가의 사용 일자 연산이 조회에서만 필요한가? vacation table에 '사용일수' 컬럼을 하나 파면 어떨까?
+            # 휴가 신청 시에 연산해서 테이블에 담고 -> 모델에서 가져와서 sum만 하면 되도록
+            cal_vacations = (end_date - start_date).days + 1  # 반환형식: 숫자
+            total_vacations.append(cal_vacations)
+
+            if datetime.today() >= datetime(start_date.year, start_date.month, start_date.day, hour=11):
+                button_text["text"] = "사용완료"
+
+            else:
+                button_text["text"] = "사용대기"
+                button_style = {"style": "primary"}
+                button.update(button_style)
+
+            if start_date == end_date:
+                vacation_form["text"] = f"{start_date}{start_day} - {cal_vacations}day"
+                result.append(vacation_list_form)
+
+            else:
+                vacation_form["text"] = f"{start_date}{start_day} ~ {end_date}{end_day} - {cal_vacations}days"
+                result.append(vacation_list_form)
+
+        section_text['text'] = f"*{user.name}* 님의 휴가 사용 내역: 총 *{len(serialized_vacation)}* 건, 사용 일수: 총 *{sum(total_vacations)}* 일"
+
+        # result가 list여서 꺼내는게 문제였는데, 반대로 리스트인걸 이용하기로 함
+        # "blocks" 키 값의 value를 리스트[]로 싸는 형식이라 거기서 result를 불러준다.
         form = {
             "response_type": "in_channel",
             "attachments": [{
                 "color": "#2eb886",
-                "blocks": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"*{user.name}* 님의 휴가 사용 내역: *{len(vacation)}*"
-                        }
-                    },
-                    {
-                        "type": "divider"
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"{vacations}"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "accessory": {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "사용 완료",
-                            },
-                            "style": "primary"
-                        },
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "2022.11.21 (금) - 1일"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "accessory": {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "사용 완료",
-                            },
-                            "style": "primary"
-                        },
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "2022.11.21 (금) ~ 11.22 (토) - 2일"
-                        }
-                    }
-                ]
+                "blocks": result
             }]
         }
-        return Response(data=form, status=status.HTTP_200_OK)
+        return form
+
+    def generate_payload(self, data):
+        return data
+
+
