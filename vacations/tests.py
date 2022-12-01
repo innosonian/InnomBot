@@ -96,7 +96,6 @@ class AnimalTestCase(TestCase):
                     }
 
         self.assertEquals(expected, result)
-        print('hello???')
 
 
 
