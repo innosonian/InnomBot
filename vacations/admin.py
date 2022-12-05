@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ImportExportMixin
 
-from vacations.models import Vacation, User
+from vacations.models import Vacation, User, VacationType
 
 
 # Register your models here.
@@ -13,3 +13,8 @@ class VacationAdmin(ImportExportMixin, admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ['id', 'name']
+
+
+@admin.register(VacationType)
+class UserAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ['id', 'name', 'weight']

@@ -9,6 +9,11 @@ class User(models.Model):
         return self.name
 
 
+class VacationType(models.Model):
+    name = models.CharField(max_length=256)
+    weight = models.DecimalField(max_digits=3, decimal_places=2)
+
+
 class Vacation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start_date = models.DateTimeField()
