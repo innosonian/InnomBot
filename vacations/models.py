@@ -11,7 +11,7 @@ class User(models.Model):
 
 class VacationType(models.Model):
     name = models.CharField(max_length=256)
-    weight = models.DecimalField(max_digits=3, decimal_places=2)
+    weight = models.DecimalField(max_digits=3, decimal_places=1)
 
 
 class Vacation(models.Model):
