@@ -13,11 +13,15 @@ class VacationType(models.Model):
     name = models.CharField(max_length=256)
     weight = models.DecimalField(max_digits=3, decimal_places=1)
 
+    def __str__(self):
+        return self.name
+
 
 class Vacation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     message = models.TextField(null=True)
+    vacation_type = models.ForeignKey(VacationType, on_delete=models.CASCADE, default=1)
     created_at = models.DateTimeField(auto_created=True)
     deleted_at = models.DateTimeField(null=True)
