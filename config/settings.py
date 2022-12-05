@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'vacations',
-    'django_seed'
+    'django_seed',
+    'import_export'
 ]
 
 MIDDLEWARE = [
