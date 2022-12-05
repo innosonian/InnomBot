@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-je58fjn)d96xjbmd7wlyd9&!35=(9qg8=+u1mdyrby+6o&c_w)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['innom.eba-nznjddtb.ap-northeast-2.elasticbeanstalk.com', '127.0.0.1']
+ALLOWED_HOSTS = ['innom.eba-nznjddtb.ap-northeast-2.elasticbeanstalk.com', '127.0.0.1', 'innom.braydenlab.com']
 
 
 # lication definition
