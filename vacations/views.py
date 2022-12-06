@@ -2,11 +2,11 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
-from .models import Vacation, User
+from .models import Vacation, User, VacationType
 from datetime import datetime, date
 import dateutil.parser
 import json
-
+DAY_OFF = 1
 
 def date_formatter(timezone_data):
     dt_parse = dateutil.parser.parse(timezone_data)
@@ -53,7 +53,11 @@ class VacationAPI(APIView):
 
             # 각 휴가의 사용 일자 연산이 조회에서만 필요한가? vacation table에 '사용일수' 컬럼을 하나 파면 어떨까?
             # 휴가 신청 시에 연산해서 테이블에 담고 -> 모델에서 가져와서 sum만 하면 되도록
-            cal_vacations = (end_date - start_date).days + 1  # 반환형식: 숫자
+            vacation_type = VacationType.objects.get(id=data.get('vacation_type'))
+            if vacation_type.id == DAY_OFF:
+                cal_vacations = int((end_date - start_date).days + vacation_type.weight)  # 반환형식: 숫자
+            else:
+                cal_vacations = vacation_type.weight
             total_vacations.append(cal_vacations)
 
             if datetime.today() >= datetime(start_date.year, start_date.month, start_date.day, hour=11):
