@@ -6,7 +6,9 @@ from .models import Vacation, User, VacationType
 from datetime import datetime, date
 import dateutil.parser
 import json
+
 DAY_OFF = 1
+
 
 def date_formatter(timezone_data):
     dt_parse = dateutil.parser.parse(timezone_data)
@@ -17,11 +19,11 @@ def date_formatter(timezone_data):
 def day_of_date(date_format):
     days = ['(월)', '(화)', '(수)', '(목)', '(금)', '(토)', '(일)']
     day_num = date_format.weekday()
-    day= days[day_num]
+    day = days[day_num]
     return day
 
 
-class VacationAPI(APIView):
+class VacationCheckAPI(APIView):
     def post(self, request):
         user = User.objects.get(id=request.data.get('user_id'))
         vacation = Vacation.objects.filter(user=user)
@@ -76,7 +78,8 @@ class VacationAPI(APIView):
                 vacation_form["text"] = f"{start_date}{start_day} ~ {end_date}{end_day} - {cal_vacations}days"
                 result.append(vacation_list_form)
 
-        section_text['text'] = f"*{user.name}* 님의 휴가 사용 내역: 총 *{len(serialized_vacation)}* 건, 사용 일수: 총 *{sum(total_vacations)}* 일"
+        section_text[
+            'text'] = f"*{user.name}* 님의 휴가 사용 내역: 총 *{len(serialized_vacation)}* 건, 사용 일수: 총 *{sum(total_vacations)}* 일"
 
         # result가 list여서 꺼내는게 문제였는데, 반대로 리스트인걸 이용하기로 함
         # "blocks" 키 값의 value를 리스트[]로 싸는 형식이라 거기서 result를 불러준다.
@@ -93,3 +96,115 @@ class VacationAPI(APIView):
         return data
 
 
+class VacationCreateAPI(APIView):
+    def post(self, request):
+        form = {
+            "response_type": "in_channel",
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "휴가 신청서(Request For Vacation)",
+                    }
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*휴가 종류(Vacation Type)*"
+                    }
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "static_select",
+                            "placeholder": {
+                                "type": "plain_text",
+                                "text": "Select an item",
+                            },
+                            "options": [
+                                {
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "연차/월차",
+                                    },
+                                    "value": "value-0"
+                                },
+                                {
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "반차",
+                                    },
+                                    "value": "value-1"
+                                }
+                            ],
+                            "action_id": "actionId-3"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*휴가 일정(Vacation Schedule)*"
+                    }
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "datepicker",
+                            "initial_date": date.today(),
+                            "placeholder": {
+                                "type": "plain_text",
+                                "text": "Select a date",
+                            },
+                            "action_id": "actionId-0"
+                        },
+                        {
+                            "type": "datepicker",
+                            "initial_date": date.today(),
+                            "placeholder": {
+                                "type": "plain_text",
+                                "text": "Select a date",
+                            },
+                            "action_id": "actionId-1"
+                        }
+                    ]
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "plain_text_input",
+                        "action_id": "plain_text_input-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "메시지(Message)",
+                    }
+                },
+                {
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": " "
+                    },
+                    "type": "section",
+                    "accessory": {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "전송",
+                        },
+                        "style": "primary",
+                        "value": "click_me_123",
+                        "action_id": "actionId-0"
+                    }
+                }
+            ]
+        }
+        return Response(data=form, status=status.HTTP_200_OK)
