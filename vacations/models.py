@@ -23,5 +23,5 @@ class Vacation(models.Model):
     end_date = models.DateTimeField()
     message = models.TextField(null=True)
     vacation_type = models.ForeignKey(VacationType, on_delete=models.CASCADE, default=1)
-    created_at = models.DateTimeField(auto_created=True)
-    deleted_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_created=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
