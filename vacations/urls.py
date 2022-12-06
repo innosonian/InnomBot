@@ -6,6 +6,6 @@ app_name = "vacations"
 
 urlpatterns = [
     path('check', views.vacation_get),
-    path('test', views.test),
+    path('apply', views.vacation_apply),
     path('', views.vacation_create_form)
 ]

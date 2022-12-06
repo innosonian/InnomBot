@@ -217,7 +217,7 @@ def vacation_create_form(request):
 
 
 @api_view(["POST"])
-def test(request):
+def vacation_apply(request):
     data = json.loads(request.data['payload'])
     user = data['user']['id']
     vacation_type = data['state']['values']['vacation_type_id']['vacation_type']['selected_option']['value']
