@@ -1,12 +1,12 @@
+import json
+
 from rest_framework.decorators import api_view
-from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
 from .models import Vacation, User, VacationType
 from datetime import datetime, date
 import dateutil.parser
-import json
 
 DAY_OFF = 1
 
@@ -123,6 +123,7 @@ def vacation_create_form(request):
             },
             {
                 "type": "actions",
+                "block_id": "vacation_type_id",
                 "elements": [
                     {
                         "type": "static_select",
@@ -136,17 +137,17 @@ def vacation_create_form(request):
                                     "type": "plain_text",
                                     "text": "연차/월차",
                                 },
-                                "value": "value-0"
+                                "value": "1"
                             },
                             {
                                 "text": {
                                     "type": "plain_text",
                                     "text": "반차",
                                 },
-                                "value": "value-1"
+                                "value": "2"
                             }
                         ],
-                        "action_id": "actionId-3"
+                        "action_id": "vacation_type"
                     }
                 ]
             },
@@ -159,6 +160,7 @@ def vacation_create_form(request):
             },
             {
                 "type": "actions",
+                "block_id": "date_id",
                 "elements": [
                     {
                         "type": "datepicker",
@@ -167,7 +169,7 @@ def vacation_create_form(request):
                             "type": "plain_text",
                             "text": "Select a date",
                         },
-                        "action_id": "actionId-0"
+                        "action_id": "start_date"
                     },
                     {
                         "type": "datepicker",
@@ -176,15 +178,16 @@ def vacation_create_form(request):
                             "type": "plain_text",
                             "text": "Select a date",
                         },
-                        "action_id": "actionId-1"
+                        "action_id": "end_date"
                     }
                 ]
             },
             {
                 "type": "input",
+                "block_id": "message_id",
                 "element": {
                     "type": "plain_text_input",
-                    "action_id": "plain_text_input-action"
+                    "action_id": "message"
                 },
                 "label": {
                     "type": "plain_text",
@@ -211,3 +214,18 @@ def vacation_create_form(request):
         ]
     }
     return Response(data=form, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def test(request):
+    data = json.loads(request.data['payload'])
+    user = data['user']['id']
+    vacation_type = data['state']['values']['vacation_type_id']['vacation_type']['selected_option']['value']
+    start_date = data['state']['values']['date_id']['start_date']['selected_date']
+    end_date = data['state']['values']['date_id']['end_date']['selected_date']
+    message = data['state']['values']['message_id']['message']['value']
+    user = User.objects.get(id=user)
+    vacation_type = VacationType.objects.get(id=vacation_type)
+
+    Vacation.objects.create(user=user, vacation_type=vacation_type, start_date=start_date, end_date=end_date, message=message)
+    return Response({"message": "tesst"}, status=status.HTTP_200_OK)
