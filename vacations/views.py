@@ -27,7 +27,7 @@ def day_of_date(date_format):
 @api_view(["POST"])
 def vacation_get(request):
     user = User.objects.get(id=request.data.get('user_id'))
-    vacation = Vacation.objects.filter(user=user)
+    vacation = Vacation.objects.filter(user=user).order_by('-start_date')
     serializer = VacationSerializer(vacation, many=True)
     form = generate_from_data(serializer.data, user)
     print("form:::", form)
