@@ -1,5 +1,6 @@
 import json
 
+import requests
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
@@ -207,8 +208,8 @@ def vacation_create_form(request):
                         "text": "전송",
                     },
                     "style": "primary",
-                    "value": "click_me_123",
-                    "action_id": "actionId-0"
+                    "value": "apply",
+                    "action_id": "vacation_apply"
                 }
             }
         ]
@@ -219,13 +220,29 @@ def vacation_create_form(request):
 @api_view(["POST"])
 def vacation_apply(request):
     data = json.loads(request.data['payload'])
-    user = data['user']['id']
-    vacation_type = data['state']['values']['vacation_type_id']['vacation_type']['selected_option']['value']
-    start_date = data['state']['values']['date_id']['start_date']['selected_date']
-    end_date = data['state']['values']['date_id']['end_date']['selected_date']
-    message = data['state']['values']['message_id']['message']['value']
-    user = User.objects.get(id=user)
-    vacation_type = VacationType.objects.get(id=vacation_type)
+    if data['actions'][0]['action_id'] == 'vacation_apply':
+        user = data['user']['id']
+        vacation_type = data['state']['values']['vacation_type_id']['vacation_type']['selected_option']['value']
+        start_date = data['state']['values']['date_id']['start_date']['selected_date']
+        end_date = data['state']['values']['date_id']['end_date']['selected_date']
+        message = data['state']['values']['message_id']['message']['value']
+        user = User.objects.get(id=user)
+        vacation_type = VacationType.objects.get(id=vacation_type)
 
-    Vacation.objects.create(user=user, vacation_type=vacation_type, start_date=start_date, end_date=end_date, message=message)
-    return Response({"message": "tesst"}, status=status.HTTP_200_OK)
+        Vacation.objects.create(user=user, vacation_type=vacation_type, start_date=start_date, end_date=end_date,
+                                message=message)
+        form = {
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "휴가 요청이 성공적으로 등록되었습니다.",
+                    }
+                }
+            ]
+        }
+        res = requests.post(data['response_url'], json=form)
+        return Response({'message': res.status_code}, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': '무시해'}, status=status.HTTP_200_OK)
