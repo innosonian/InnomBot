@@ -102,7 +102,28 @@ def generate_payload(data):
 
 @api_view(["POST"])
 def vacation_create_form(request):
-    form = {
+    form = get_vacation_apply_form()
+    print(form)
+    return Response(data=form, status=status.HTTP_200_OK)
+
+
+def get_vacation_type():
+    vacation_type = VacationType.objects.all()
+    result = list()
+    for item in vacation_type:
+        s = {
+            "text": {
+                "type": "plain_text",
+                "text": item.name,
+            },
+            "value": f"{item.id}"
+        }
+        result.append(s)
+    return result
+
+
+def get_vacation_apply_form():
+    return {
         "response_type": "in_channel",
         "blocks": [
             {
@@ -132,22 +153,7 @@ def vacation_create_form(request):
                             "type": "plain_text",
                             "text": "Select an item",
                         },
-                        "options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "연차/월차",
-                                },
-                                "value": "1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "반차",
-                                },
-                                "value": "2"
-                            }
-                        ],
+                        "options": get_vacation_type(),
                         "action_id": "vacation_type"
                     }
                 ]
@@ -214,7 +220,6 @@ def vacation_create_form(request):
             }
         ]
     }
-    return Response(data=form, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
