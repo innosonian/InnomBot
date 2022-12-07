@@ -7,15 +7,8 @@ from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
 from .models import Vacation, User, VacationType
 from datetime import datetime, date
-import dateutil.parser
 
 DAY_OFF = 1
-
-
-def date_formatter(timezone_data):
-    dt_parse = dateutil.parser.parse(timezone_data)
-    date_format = date(dt_parse.year, dt_parse.month, dt_parse.day)
-    return date_format
 
 
 def day_of_date(date_format):
@@ -51,9 +44,9 @@ def generate_from_data(serialized_vacation, user):
         vacation_form = {"type": "mrkdwn", "text": ""}
         vacation_list_form = {"type": "section", "accessory": button, "text": vacation_form}
 
-        start_date = date_formatter(data.get('start_date'))
+        start_date = datetime.strptime(data.get('start_date'), '%Y-%m-%d').date()
         start_day = day_of_date(start_date)
-        end_date = date_formatter(data.get('end_date'))
+        end_date = datetime.strptime(data.get('end_date'), '%Y-%m-%d').date()
         end_day = day_of_date(end_date)
 
         # 각 휴가의 사용 일자 연산이 조회에서만 필요한가? vacation table에 '사용일수' 컬럼을 하나 파면 어떨까?
