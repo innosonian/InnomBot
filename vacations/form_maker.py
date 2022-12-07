@@ -47,7 +47,7 @@ def generate_from_data(serialized_vacation, user):
             button_style = {"style": "primary"}
             button.update(button_style)
 
-        if start_date == end_date:
+        if vacation_type.id != DAY_OFF or start_date == end_date:
             vacation_form["text"] = f"{start_date}{start_day} - {cal_vacations}day"
             result.append(vacation_list_form)
 
