@@ -226,6 +226,10 @@ def vacation_apply(request):
         start_date = data['state']['values']['date_id']['start_date']['selected_date']
         end_date = data['state']['values']['date_id']['end_date']['selected_date']
         message = data['state']['values']['message_id']['message']['value']
+
+        if start_date > end_date:
+            return Response({'message': '무시해'}, status=status.HTTP_200_OK)
+
         user = User.objects.get(id=user)
         vacation_type = VacationType.objects.get(id=vacation_type)
 
