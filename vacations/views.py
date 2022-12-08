@@ -49,7 +49,7 @@ def vacation_apply(request):
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": "휴가 요청이 성공적으로 등록되었습니다.",
+                        "text": "휴가 요청이 성공했습니다",
                     }
                 }
             ]
