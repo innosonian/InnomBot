@@ -276,3 +276,217 @@ def get_half_vacation_apply_form():
             }
         ]
     }
+
+
+def get_invalid_date_alarm_form():
+    return {
+        "response_type": "in_channel",
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "휴가 신청서(Request For Vacation)",
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*휴가 종류(Vacation Type)*"
+                }
+            },
+            {
+                "type": "actions",
+                "block_id": "vacation_type_id",
+                "elements": [
+                    {
+                        "type": "static_select",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select an item",
+                        },
+                        "options": get_vacation_type(),
+                        "action_id": "vacation_type"
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*휴가 일정(Vacation Schedule)*"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "⚠️ 휴가 일정이 이상합니다."
+                }
+            },
+            {
+                "type": "actions",
+                "block_id": "date_id",
+                "elements": [
+                    {
+                        "type": "datepicker",
+                        "initial_date": f"{date.today()}",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select a date",
+                        },
+                        "action_id": "start_date"
+                    },
+                    {
+                        "type": "datepicker",
+                        "initial_date": f"{date.today()}",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select a date",
+                        },
+                        "action_id": "end_date"
+                    }
+                ]
+            },
+            {
+                "type": "input",
+                "block_id": "message_id",
+                "element": {
+                    "type": "plain_text_input",
+                    "action_id": "message"
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "메시지(Message)",
+                }
+            },
+            {
+                "text": {
+                    "type": "mrkdwn",
+                    "text": " "
+                },
+                "type": "section",
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "전송",
+                    },
+                    "style": "primary",
+                    "value": "apply",
+                    "action_id": "vacation_apply"
+                }
+            }
+        ]
+    }
+
+
+def get_not_selected_vacation_type_alarm_form():
+    return {
+        "response_type": "in_channel",
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "휴가 신청서(Request For Vacation)",
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*휴가 종류(Vacation Type)*"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "⚠️ 휴가 종류를 선택해 주세요."
+                }
+            },
+            {
+                "type": "actions",
+                "block_id": "vacation_type_id",
+                "elements": [
+                    {
+                        "type": "static_select",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select an item",
+                        },
+                        "options": get_vacation_type(),
+                        "action_id": "vacation_type"
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*휴가 일정(Vacation Schedule)*"
+                }
+            },
+            {
+                "type": "actions",
+                "block_id": "date_id",
+                "elements": [
+                    {
+                        "type": "datepicker",
+                        "initial_date": f"{date.today()}",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select a date",
+                        },
+                        "action_id": "start_date"
+                    },
+                    {
+                        "type": "datepicker",
+                        "initial_date": f"{date.today()}",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select a date",
+                        },
+                        "action_id": "end_date"
+                    }
+                ]
+            },
+            {
+                "type": "input",
+                "block_id": "message_id",
+                "element": {
+                    "type": "plain_text_input",
+                    "action_id": "message"
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "메시지(Message)",
+                }
+            },
+            {
+                "text": {
+                    "type": "mrkdwn",
+                    "text": " "
+                },
+                "type": "section",
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "전송",
+                    },
+                    "style": "primary",
+                    "value": "apply",
+                    "action_id": "vacation_apply"
+                }
+            }
+        ]
+    }

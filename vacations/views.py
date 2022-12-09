@@ -5,7 +5,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
-from .form_maker import generate_from_data, get_vacation_apply_form, get_half_vacation_apply_form
+from .form_maker import generate_from_data, get_vacation_apply_form, get_half_vacation_apply_form, get_invalid_date_alarm_form, \
+    get_not_selected_vacation_type_alarm_form
 from .models import Vacation, User, VacationType
 
 
@@ -28,12 +29,19 @@ def vacation_create_form(request):
 @api_view(["POST"])
 def vacation_apply(request):
     data = json.loads(request.data['payload'])
+    user = data['user']['id']
+    start_date = data['state']['values']['date_id']['start_date']['selected_date']
+    end_date = data['state']['values']['date_id']['end_date']['selected_date'] if 'end_date' in data['state']['values']['date_id'] else ''
+    message = data['state']['values']['message_id']['message']['value']
     if data['actions'][0]['action_id'] == 'vacation_apply':
-        user = data['user']['id']
+        if data['state']['values']['vacation_type_id']['vacation_type']['selected_option'] is None:
+            requests.post(data['response_url'], json=get_not_selected_vacation_type_alarm_form())
+            return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
+        if start_date > end_date:
+            requests.post(data['response_url'], json=get_invalid_date_alarm_form())
+            return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
+
         vacation_type = data['state']['values']['vacation_type_id']['vacation_type']['selected_option']['value']
-        start_date = data['state']['values']['date_id']['start_date']['selected_date']
-        end_date = data['state']['values']['date_id']['end_date']['selected_date']
-        message = data['state']['values']['message_id']['message']['value']
 
         if start_date > end_date:
             return Response({'message': '무시해'}, status=status.HTTP_200_OK)
