@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
-from .form_maker import generate_from_data, get_vacation_apply_form
+from .form_maker import generate_from_data, get_vacation_apply_form, get_half_vacation_apply_form
 from .models import Vacation, User, VacationType
 
 
@@ -56,5 +56,13 @@ def vacation_apply(request):
         }
         res = requests.post(data['response_url'], json=form)
         return Response({'message': res.status_code}, status=status.HTTP_200_OK)
+    elif data['actions'][0]['action_id'] == 'vacation_type':
+        if data['actions'][0]['selected_option']['value'] == '1':
+            form = get_vacation_apply_form()
+            requests.post(data['response_url'], json=form)
+            return Response(data=get_vacation_apply_form(), status=status.HTTP_200_OK)
+        else:
+            requests.post(data['response_url'], json=get_half_vacation_apply_form())
+            return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
     else:
         return Response({'message': '무시해'}, status=status.HTTP_200_OK)
