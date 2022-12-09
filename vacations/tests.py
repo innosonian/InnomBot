@@ -1,26 +1,98 @@
-from django.test import Testcase, Client
+from collections import OrderedDict
 
-import json
+from django.test import TestCase
+from . import views
 
-from .models import Vacation, User
 
-# 설정한 엔드 포인트 경로를 통해 함수를 호출. request나 http와 비슷한 일
-client = Client()
+class User():
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
 
-# 테스트 케이스를 만들 때는 항상 TestCase() 객체를 상속받아 새로운 테스트 클래스를 생성
-class VacationTest(Tast):
-    # 테스트 함수는 test_ 를 붙여 줘야 테스트 함수로 인식
-    def test_check_vacation_post_success(self):
-        # 테스트를 위해 request가 가지고 있는 data를 임의로 만들어 준다.
-        data = {
-            'user_id'   :   'U04ARD6H3PU'
-        }
+    def __str__(self):
+        return self.name
 
-        # post 함수에 대한 테스트이기 때문에 post로 작성.
-        response = client.post('/vacations', json.dumps(data), content_type= 'application/json')
 
-        # 반환되는 status_code와 message가 같은지 비교하여 같을 경우 테스트에서 OK를 띄워준다.
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {
-            "message" : "SUCCESS"
-        })
+class Vacation:
+    def __init__(self, user=None, start_date=None, end_date=None, message=None, created_at=None, deleted_at=None):
+        self.user = user
+        self.start_date = start_date
+        self.end_date = end_date
+        self.message = message
+        self.created_at = created_at
+        self.deleted_at = deleted_at
+
+
+class AnimalTestCase(TestCase):
+    def setUp(self):
+        self.maxDiff = None
+
+    def test_hello(self):
+        data = [OrderedDict([('id', 3), ('created_at', '2022-11-25T07:02:40Z'), ('start_date', '2022-11-25T07:02:43Z'),
+                             ('end_date', '2022-11-25T07:02:45Z'), ('message', 'dd'),
+                             ('deleted_at', '2022-11-25T07:02:50Z'),
+                             ('user', 'U04ARD6H3PU')]),
+                OrderedDict(
+                    [('id', 4), ('created_at', '2022-11-25T07:02:58Z'), ('start_date', '2022-11-25T07:03:02Z'),
+                     ('end_date', '2022-11-26T07:03:05Z'), ('message', 'ddd'), ('deleted_at', '2022-11-25T07:03:10Z'),
+                     ('user', 'U04ARD6H3PU')]),
+                OrderedDict(
+                    [('id', 5), ('created_at', '2022-11-28T01:58:44Z'), ('start_date', '2022-11-28T01:58:51Z'),
+                     ('end_date', '2023-01-01T01:59:04Z'), ('message', 'ㅇㅇㅇ'), ('deleted_at', '2022-11-28T01:59:10Z'),
+                     ('user', 'U04ARD6H3PU')]),
+                OrderedDict(
+                    [('id', 6), ('created_at', '2022-11-28T03:07:20Z'), ('start_date', '2022-12-01T03:07:30Z'),
+                     ('end_date', '2022-12-01T03:07:39Z'), ('message', 'dd'), ('deleted_at', '2022-11-28T03:07:42Z'),
+                     ('user', 'U04ARD6H3PU')])]
+
+        vacation_api = views.VacationAPI()
+        user = User(1, "Ria")
+        result = vacation_api.generate_from_data(data, user)
+        expected = {"response_type": "in_channel",
+                    'attachments':
+                        [{'color': '#2eb886',
+                          'blocks':
+                                [{'type': 'section',
+                                  'text': {'text': '*Ria* 님의 휴가 사용 내역: 총 *4* 건, 사용 일수: 총 *39* 일',
+                                           'type': 'mrkdwn'},
+                                  },
+                                 {'type': 'divider'},
+                                 {'type': 'section',
+                                  'accessory': {'type': 'button',
+                                                'text': {'type': 'plain_text',
+                                                         'text': '사용완료'}
+                                                },
+                                  'text': {'type': 'mrkdwn',
+                                           'text': '2022-11-25(금) - 1day'}
+                                  },
+                                  {'type': 'section',
+                                   'accessory': {'type': 'button',
+                                                 'text': {'type': 'plain_text',
+                                                          'text': '사용완료'}
+                                                 },
+                                   'text': {'type': 'mrkdwn',
+                                            'text': '2022-11-25(금) ~ 2022-11-26(토) - 2days'}
+                                   },
+                                   {'type': 'section',
+                                    'accessory': {'type': 'button',
+                                                  'text': {'type': 'plain_text',
+                                                           'text': '사용완료'}
+                                                  },
+                                    'text': {'type': 'mrkdwn',
+                                             'text': '2022-11-28(월) ~ 2023-01-01(일) - 35days'}
+                                    },
+                                    {'type': 'section',
+                                     'accessory': {'type': 'button',
+                                                   'text': {'type': 'plain_text',
+                                                            'text': '사용대기'},
+                                                   'style': 'primary'
+                                                   },
+                                     'text': {'type': 'mrkdwn',
+                                              'text': '2022-12-01(목) - 1day'}
+                                     }
+                                    ],
+                                }
+                         ],
+                    }
+
+        self.assertEquals(expected, result)

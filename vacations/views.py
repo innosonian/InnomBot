@@ -1,10 +1,13 @@
-from rest_framework.views import APIView
+import json
+
+import requests
 from rest_framework import status
 from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
-from .models import Vacation, User
 from datetime import datetime, date
-import dateutil.parser
+from .form_maker import generate_from_data, get_vacation_apply_form
+from .models import Vacation, User, VacationType
+
 
 def timezone_parser(timezone_data):
     days = ['월(Mon)','화(Tue)','수(Wed)','목(Thu)','금(Fri)','토(Sat)','일(Sun)']
@@ -16,72 +19,52 @@ def timezone_parser(timezone_data):
 
     return final_format
 
-class VacationAPI(APIView):
-    def post(self, request):
-        user = User.objects.get(id=request.data.get('user_id'))
-        vacation = Vacation.objects.filter(user=user)
-        serializer = VacationSerializer(vacation, many=True)
-        result = list()
-        for data in serializer.data:
-            vacation_format = timezone_parser(data.get('date'))
-            print("vacation_format::::", vacation_format)
-            result.append(vacation_format)
+@api_view(["POST"])
+def vacation_get(request):
+    user = User.objects.get(id=request.data.get('user_id'))
+    vacation = Vacation.objects.filter(user=user).order_by('-start_date')
+    serializer = VacationSerializer(vacation, many=True)
+    form = generate_from_data(serializer.data, user)
+    print("form:::", form)
+    return Response(data=form, status=status.HTTP_200_OK)
 
-        vacations = '\n'.join(result)
+
+@api_view(["POST"])
+def vacation_create_form(request):
+    form = get_vacation_apply_form()
+    return Response(data=form, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def vacation_apply(request):
+    data = json.loads(request.data['payload'])
+    if data['actions'][0]['action_id'] == 'vacation_apply':
+        user = data['user']['id']
+        vacation_type = data['state']['values']['vacation_type_id']['vacation_type']['selected_option']['value']
+        start_date = data['state']['values']['date_id']['start_date']['selected_date']
+        end_date = data['state']['values']['date_id']['end_date']['selected_date']
+        message = data['state']['values']['message_id']['message']['value']
+
+        if start_date > end_date:
+            return Response({'message': '무시해'}, status=status.HTTP_200_OK)
+
+        user = User.objects.get(id=user)
+        vacation_type = VacationType.objects.get(id=vacation_type)
+
+        Vacation.objects.create(user=user, vacation_type=vacation_type, start_date=start_date, end_date=end_date,
+                                message=message)
         form = {
-            "channel": "D04BJFUAQFR",
-            "response_type": "in_channel",
-            "attachments": [{
-                "color": "#2eb886",
-                "blocks": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"*{user.name}* 님의 휴가 사용 내역: *{len(vacation)}*"
-                        }
-                    },
-                    {
-                        "type": "divider"
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"{vacations}"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "accessory": {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "사용 완료",
-                            },
-                            "style": "primary"
-                        },
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "2022.11.21 (금) - 1일"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "accessory": {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "사용 완료",
-                            },
-                            "style": "primary"
-                        },
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "2022.11.21 (금) ~ 11.22 (토) - 2일"
-                        }
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "휴가 요청이 성공했습니다",
                     }
-                ]
-            }]
+                }
+            ]
         }
-        return Response(data=form, status=status.HTTP_200_OK)
+        res = requests.post(data['response_url'], json=form)
+        return Response({'message': res.status_code}, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': '무시해'}, status=status.HTTP_200_OK)
