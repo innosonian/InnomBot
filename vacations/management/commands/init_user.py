@@ -4,7 +4,7 @@ from vacations.models import User
 
 
 class Command(BaseCommand):
-    help = 'init setting food category'
+    help = 'init user'
 
     def handle(self, *args, **options):
         categories = [

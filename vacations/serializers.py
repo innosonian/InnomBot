@@ -4,6 +4,8 @@ from vacations.models import Vacation, User
 
 
 class VacationSerializer(serializers.ModelSerializer):
+    order_by = ('start_date', )
+
     class Meta:
         model = Vacation
         fields = '__all__'
