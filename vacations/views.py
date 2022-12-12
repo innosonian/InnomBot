@@ -11,7 +11,7 @@ from .form_maker import generate_from_data, get_vacation_apply_form, get_half_va
 from .models import Vacation, User, VacationType
 
 
-SLACK_URL = 'https://hooks.slack.com/services/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'
+SLACK_URL = 'https://hooks.slack.com/services/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'
 
 @api_view(["POST"])
 def vacation_get(request):
@@ -72,6 +72,7 @@ def vacation_apply(request):
 
         requests.post(data['response_url'], json=get_vacation_apply_success_form())
         res = requests.post(SLACK_URL, json=get_vacation_apply_success_alarm(user, vacation_type, start_date, end_date=end_date))
+        print(res.content)
         return Response({'message': res.status_code}, status=status.HTTP_200_OK)
     elif is_change_vacation_type(data):
         if is_day_off(data):
