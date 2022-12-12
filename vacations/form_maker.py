@@ -514,7 +514,7 @@ def get_vacation_apply_success_alarm(user, vacation_type, start_date, end_date):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*{user.name}* 님이 *{start_date}* 에 {vacation_type.name} 사용할 예정 입니다."
+                        "text": f"<@{user.id}> 님이 *{start_date}* 에 {vacation_type.name} 사용할 예정 입니다."
                     }
                 }
             ]
@@ -526,7 +526,7 @@ def get_vacation_apply_success_alarm(user, vacation_type, start_date, end_date):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*{user.name}* 님이 *{start_date} ~ {end_date}* 에 {vacation_type.name} 사용할 예정 입니다."
+                        "text": f"<@{user.id}> 님이 *{start_date} ~ {end_date}* 에 {vacation_type.name} 사용할 예정 입니다."
                     }
                 }
             ]

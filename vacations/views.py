@@ -52,8 +52,7 @@ def vacation_apply(request):
     start_date = data['state']['values']['date_id']['start_date']['selected_date']
     end_date = data['state']['values']['date_id']['end_date']['selected_date'] if 'end_date' in data['state']['values']['date_id'] else start_date
     message = data['state']['values']['message_id']['message']['value']
-    print(start_date)
-    print(end_date)
+    print(data)
 
     if is_click_apply_button(data):
         if is_not_select_vacation_type(data):
