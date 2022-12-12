@@ -7,9 +7,11 @@ from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
 from .form_maker import generate_from_data, get_vacation_apply_form, get_half_vacation_apply_form, \
     get_invalid_date_alarm_form, \
-    get_not_selected_vacation_type_alarm_form, get_vacation_apply_success_form
+    get_not_selected_vacation_type_alarm_form, get_vacation_apply_success_form, get_vacation_apply_success_alarm
 from .models import Vacation, User, VacationType
 
+
+SLACK_URL = 'https://hooks.slack.com/services/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'
 
 @api_view(["POST"])
 def vacation_get(request):
@@ -48,14 +50,16 @@ def vacation_apply(request):
     data = json.loads(request.data['payload'])
     user = data['user']['id']
     start_date = data['state']['values']['date_id']['start_date']['selected_date']
-    end_date = data['state']['values']['date_id']['end_date']['selected_date'] if 'end_date' in data['state']['values']['date_id'] else ''
+    end_date = data['state']['values']['date_id']['end_date']['selected_date'] if 'end_date' in data['state']['values']['date_id'] else start_date
     message = data['state']['values']['message_id']['message']['value']
+    print(start_date)
+    print(end_date)
 
     if is_click_apply_button(data):
         if is_not_select_vacation_type(data):
             requests.post(data['response_url'], json=get_not_selected_vacation_type_alarm_form())
             return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
-        if start_date > end_date:
+        if end_date != '' and start_date > end_date:
             requests.post(data['response_url'], json=get_invalid_date_alarm_form())
             return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
 
@@ -67,7 +71,8 @@ def vacation_apply(request):
         Vacation.objects.create(user=user, vacation_type=vacation_type, start_date=start_date, end_date=end_date,
                                 message=message)
 
-        res = requests.post(data['response_url'], json=get_vacation_apply_success_form())
+        requests.post(data['response_url'], json=get_vacation_apply_success_form())
+        res = requests.post(SLACK_URL, json=get_vacation_apply_success_alarm(user, vacation_type, start_date, end_date=end_date))
         return Response({'message': res.status_code}, status=status.HTTP_200_OK)
     elif is_change_vacation_type(data):
         if is_day_off(data):

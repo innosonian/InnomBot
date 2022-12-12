@@ -504,3 +504,30 @@ def get_vacation_apply_success_form():
                 }
             ]
         }
+
+
+def get_vacation_apply_success_alarm(user, vacation_type, start_date, end_date):
+    if end_date == start_date:
+        return {
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*{user.name}* 님이 *{start_date}* 에 {vacation_type.name} 사용할 예정 입니다."
+                    }
+                }
+            ]
+        }
+    else:
+        return {
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*{user.name}* 님이 *{start_date} ~ {end_date}* 에 {vacation_type.name} 사용할 예정 입니다."
+                    }
+                }
+            ]
+        }
