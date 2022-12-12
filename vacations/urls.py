@@ -5,5 +5,7 @@ from . import views
 app_name = "vacations"
 
 urlpatterns = [
-    path('', views.VacationAPI.as_view())
+    path('check', views.vacation_get),
+    path('apply', views.vacation_apply),
+    path('', views.vacation_create_form)
 ]
