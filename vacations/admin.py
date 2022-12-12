@@ -1,21 +1,14 @@
 from django.contrib import admin
-from import_export.admin import ImportExportMixin
 
-from vacations.models import Vacation, User, VacationType
+from vacations.models import Vacation, User
 
 
 # Register your models here.
 @admin.register(Vacation)
-class VacationAdmin(ImportExportMixin, admin.ModelAdmin):
-    search_fields = ['user__name']
-    list_display = ['id', 'user', 'start_date', 'end_date', 'message', 'vacation_type', 'deleted_at', 'created_at']
+class VacationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'date', 'message', 'deleted_at', 'created_at']
 
 
 @admin.register(User)
-class UserAdmin(ImportExportMixin, admin.ModelAdmin):
+class UserAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
-
-
-@admin.register(VacationType)
-class UserAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ['id', 'name', 'weight']
