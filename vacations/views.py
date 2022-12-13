@@ -87,6 +87,11 @@ def vacation_apply(request):
     elif 'vacation_delete' in data['actions'][0]['action_id']:
         vacation_id = data['actions'][0]['action_id'].split('_')[2]
         Vacation.objects.filter(id=vacation_id).update(deleted_at=datetime.now())
+        user = User.objects.get(id=data['user']['id'])
+        vacation = Vacation.objects.filter(user=user, deleted_at=None).order_by('-start_date')
+        serializer = VacationSerializer(vacation, many=True)
+        form = generate_from_data(serializer.data, user)
+        requests.post(data['response_url'], json=form)
         return Response({'message': f'{vacation_id} 해당 휴가 삭제'}, status=status.HTTP_200_OK)
     else:
         return Response({'message': '무시해'}, status=status.HTTP_200_OK)
