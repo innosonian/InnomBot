@@ -1,4 +1,5 @@
 import json
+from datetime import date, datetime
 
 import requests
 from rest_framework.decorators import api_view
@@ -16,7 +17,7 @@ SLACK_URL = 'https://hooks.slack.com/services/T08AAPSP9/B04F3G3LL5P/LSpHGj0sVSAV
 @api_view(["POST"])
 def vacation_get(request):
     user = User.objects.get(id=request.data.get('user_id'))
-    vacation = Vacation.objects.filter(user=user).order_by('-start_date')
+    vacation = Vacation.objects.filter(user=user, deleted_at=None).order_by('-start_date')
     serializer = VacationSerializer(vacation, many=True)
     form = generate_from_data(serializer.data, user)
     print("form:::", form)
@@ -48,13 +49,15 @@ def is_day_off(data):
 @api_view(["POST"])
 def vacation_apply(request):
     data = json.loads(request.data['payload'])
-    user = data['user']['id']
-    start_date = data['state']['values']['date_id']['start_date']['selected_date']
-    end_date = data['state']['values']['date_id']['end_date']['selected_date'] if 'end_date' in data['state']['values']['date_id'] else start_date
-    message = data['state']['values']['message_id']['message']['value']
     print(data)
 
     if is_click_apply_button(data):
+        user = data['user']['id']
+        start_date = data['state']['values']['date_id']['start_date']['selected_date']
+        end_date = data['state']['values']['date_id']['end_date']['selected_date'] if 'end_date' in \
+                                                                                      data['state']['values'][
+                                                                                          'date_id'] else start_date
+        message = data['state']['values']['message_id']['message']['value']
         if is_not_select_vacation_type(data):
             requests.post(data['response_url'], json=get_not_selected_vacation_type_alarm_form())
             return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
@@ -81,5 +84,9 @@ def vacation_apply(request):
         else:
             requests.post(data['response_url'], json=get_half_vacation_apply_form())
             return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
+    elif 'vacation_delete' in data['actions'][0]['action_id']:
+        vacation_id = data['actions'][0]['action_id'].split('_')[2]
+        Vacation.objects.filter(id=vacation_id).update(deleted_at=datetime.now())
+        return Response({'message': f'{vacation_id} 해당 휴가 삭제'}, status=status.HTTP_200_OK)
     else:
         return Response({'message': '무시해'}, status=status.HTTP_200_OK)

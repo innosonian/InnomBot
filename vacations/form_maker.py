@@ -43,8 +43,9 @@ def generate_from_data(serialized_vacation, user):
             button_text["text"] = "사용완료"
 
         else:
-            button_text["text"] = "사용대기"
-            button_style = {"style": "primary"}
+            button_text["text"] = "취소"
+            button['action_id'] = f"vacation_delete_{data.get('id')}"
+            button_style = {"style": "danger"}
             button.update(button_style)
 
         if vacation_type.id != DAY_OFF or start_date == end_date:
