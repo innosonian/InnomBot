@@ -495,16 +495,16 @@ def get_not_selected_vacation_type_alarm_form():
 
 def get_vacation_apply_success_form():
     return {
-            "blocks": [
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "휴가 요청이 성공했습니다",
-                    }
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "휴가 요청이 성공했습니다",
                 }
-            ]
-        }
+            }
+        ]
+    }
 
 
 def get_vacation_apply_success_alarm(user, vacation_type, start_date, end_date):
@@ -532,3 +532,17 @@ def get_vacation_apply_success_alarm(user, vacation_type, start_date, end_date):
                 }
             ]
         }
+
+
+def get_vacation_delete_alarm(user, vacation):
+    return {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"<@{user.id}> 님이 *{vacation.start_date}* 에 {vacation.vacation_type.name} 휴가를 삭제 했습니다."
+                }
+            }
+        ]
+    }

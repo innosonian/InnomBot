@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from vacations.serializers import VacationSerializer
 from .form_maker import generate_from_data, get_vacation_apply_form, get_half_vacation_apply_form, \
     get_invalid_date_alarm_form, \
-    get_not_selected_vacation_type_alarm_form, get_vacation_apply_success_form, get_vacation_apply_success_alarm
+    get_not_selected_vacation_type_alarm_form, get_vacation_apply_success_form, get_vacation_apply_success_alarm, \
+    get_vacation_delete_alarm
 from .models import Vacation, User, VacationType
 
 
@@ -86,8 +87,10 @@ def vacation_apply(request):
             return Response(data=get_half_vacation_apply_form(), status=status.HTTP_200_OK)
     elif 'vacation_delete' in data['actions'][0]['action_id']:
         vacation_id = data['actions'][0]['action_id'].split('_')[2]
-        Vacation.objects.filter(id=vacation_id).update(deleted_at=datetime.now())
+        vacation = Vacation.objects.filter(id=vacation_id)
+        vacation.update(deleted_at=datetime.now())
         user = User.objects.get(id=data['user']['id'])
+        requests.post(SLACK_URL, json=get_vacation_delete_alarm(user, vacation[0]))
         vacation = Vacation.objects.filter(user=user, deleted_at=None).order_by('-start_date')
         serializer = VacationSerializer(vacation, many=True)
         form = generate_from_data(serializer.data, user)
