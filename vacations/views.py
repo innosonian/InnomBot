@@ -2,6 +2,7 @@ import json
 from datetime import date, datetime
 
 import requests
+from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,11 +10,11 @@ from vacations.serializers import VacationSerializer
 from .form_maker import generate_from_data, get_vacation_apply_form, get_half_vacation_apply_form, \
     get_invalid_date_alarm_form, \
     get_not_selected_vacation_type_alarm_form, get_vacation_apply_success_form, get_vacation_apply_success_alarm, \
-    get_vacation_delete_alarm
+    get_vacation_delete_alarm, get_vacation_remind_alarm_form
 from .models import Vacation, User, VacationType
 
 
-SLACK_URL = 'https://hooks.slack.com/services/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'
+SLACK_URL = 'https://hooks.slack.com/services/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'
 
 @api_view(["POST"])
 def vacation_get(request):
@@ -98,3 +99,13 @@ def vacation_apply(request):
         return Response({'message': f'{vacation_id} 해당 휴가 삭제'}, status=status.HTTP_200_OK)
     else:
         return Response({'message': '무시해'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def vacation_reminder(request):
+    today = date.today()
+    today_vacations = Vacation.objects.filter(Q(start_date__lte=today, end_date__gte=today)).distinct()
+    res = requests.post(SLACK_URL, json=get_vacation_remind_alarm_form(today_vacations))
+    print(res.content)
+    return Response(data={"Message": "TODAY_VACATION_USER_REMINDER"}, status=status.HTTP_200_OK)
+

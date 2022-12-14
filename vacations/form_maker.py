@@ -546,3 +546,70 @@ def get_vacation_delete_alarm(user, vacation):
             }
         ]
     }
+
+
+def get_vacation_remind_alarm_form(vacations):
+    day_off = list()
+    half_day_off = list()
+    color = "#4EB1D4"
+    for v in vacations:
+        user = f"<@{v.user.id}>"
+        if v.vacation_type.id == DAY_OFF:
+            day_off.append(user)
+        else:
+            half_day_off.append(user)
+    blocks = list()
+    if len(day_off) + len(half_day_off) > 0:
+        blocks.append({
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "📢 오늘 휴가자",
+            }
+        })
+        if len(half_day_off) > 0:
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*- 반차*"
+                }
+            })
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": ', '.join(half_day_off)
+                }
+            })
+        if len(day_off) > 0:
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*- 연차/월차*"
+                }
+            })
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": ', '.join(day_off)
+                }
+            })
+    else:
+        color = '#F77E43'
+        blocks.append({
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "📢 오늘 휴가자는 없습니다.",
+            }
+        })
+
+    return {
+        "attachments": [{
+            "color": color,
+            "blocks": blocks
+        }]
+    }
